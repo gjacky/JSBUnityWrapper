@@ -1,5 +1,5 @@
 // jsbsim_c_api.cpp
-#include "jsbsim_c_api.h"
+#include "jsbsimAPI.h"
 #include <FGFDMExec.h>
 #include <cstring>
 
