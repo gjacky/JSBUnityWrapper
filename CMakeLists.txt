@@ -17,8 +17,8 @@ add_subdirectory(jsbsim)
 
 # Il wrapper C, compilato insieme
 add_library(JSBSimUnity SHARED
-    src/jsbsim_c_api.h
-    src/jsbsim_c_api.cpp
+    src/jsbsimAPI.h
+    src/jsbsimAPI.cpp
 )
 
 target_include_directories(JSBSimUnity PRIVATE
