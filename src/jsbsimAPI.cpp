@@ -2,6 +2,8 @@
 #include "jsbsimAPI.h"
 #include <FGFDMExec.h>
 #include <cstring>
+#include <models/FGPropagate.h>
+#include <models/FGAuxiliary.h>
 
 using namespace JSBSim;
 
@@ -74,4 +76,34 @@ double JSBSim_GetPropertyDouble(void* fdm, const char* property) {
 double JSBSim_GetSimTime(void* fdm) {
     JSBSimHandle* handle = static_cast<JSBSimHandle*>(fdm);
     return handle->fdm->GetSimTime();
+}
+
+void JSBSim_GetState(void* fdm, JSBSimState* state) {
+    JSBSimHandle* handle = static_cast<JSBSimHandle*>(fdm);
+    auto propagate = handle->fdm->GetPropagate();
+    auto auxiliary = handle->fdm->GetAuxiliary();
+
+    // Posizione
+    state->latitude_deg = propagate->GetLatitudeDeg();
+    state->longitude_deg = propagate->GetLongitudeDeg();
+    state->altitude_asl_ft = propagate->GetAltitudeASL();
+    state->altitude_agl_ft = propagate->GetDistanceAGL(); // ft
+
+    // Velocità
+    state->vcas_kts = auxiliary->GetVcalibratedKTS();
+    state->vtrue_kts = auxiliary->GetVtrueKTS();
+    state->vground_kts = auxiliary->GetVground();
+    state->vN_fps = propagate->GetVel(1); // componenti NED, indice 1/2/3 = N/E/D
+    state->vE_fps = propagate->GetVel(2);
+    state->vD_fps = propagate->GetVel(3);
+
+    // Assetto
+    state->roll_rad = propagate->GetEuler(1); // phi
+    state->pitch_rad = propagate->GetEuler(2); // theta
+    state->heading_rad = propagate->GetEuler(3); // psi
+
+    // Velocità angolari
+    state->p_rad_s = propagate->GetPQR(1);
+    state->q_rad_s = propagate->GetPQR(2);
+    state->r_rad_s = propagate->GetPQR(3);
 }

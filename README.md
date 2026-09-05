@@ -6,7 +6,7 @@ git clone --recurse-submodules https://github.com/JSBSim-Team/jsbsim.git
 
 Build del progetto
 
-Per compilare il progetto con CMake e Visual Studio 2022, eseguire i seguenti comandi dalla directory principale:
+Per compilare il progetto con CMake e Visual Studio 2026, eseguire i seguenti comandi dalla directory principale:
 
 mkdir build
 cd build
