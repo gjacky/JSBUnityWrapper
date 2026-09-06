@@ -83,7 +83,24 @@ void JSBSim_GetState(void* fdm, JSBSimState* state) {
     auto propagate = handle->fdm->GetPropagate();
     auto auxiliary = handle->fdm->GetAuxiliary();
 
-    // Posizione
+    // Matrice di trasformazione ECEF -> locale (NED)
+    const JSBSim::FGMatrix33& Tec2l = propagate->GetTec2l();
+
+    // Vettore posizione ECEF corrente (in piedi, unità JSBSim)
+    JSBSim::FGColumnVector3 ecefPos = propagate->GetLocation();
+
+	// TODO : permettere di salvare la posizione iniziale che non sia solo long 0 e lat 0
+	JSBSim::FGColumnVector3 ecefOrigin(20925646.3, 0.0, 0.0); // ECEF dell'origine (in piedi, unità JSBSim)   
+
+    // Se vuoi la posizione relativa a un'origine diversa dal centro Terra,
+    // sottrai prima il vettore ECEF dell'origine, poi applica Tec2l:
+    JSBSim::FGColumnVector3 delta = ecefPos - ecefOrigin; // ecefOrigin: FGColumnVector3
+    JSBSim::FGColumnVector3 nedPos = Tec2l * delta;
+
+	// Posizione NED, in metri
+    state->posNED_x = FGJSBBase::FeetToMeters(nedPos(1)); // X NED, m
+    state->posNED_y = FGJSBBase::FeetToMeters(nedPos(2)); // Y NED, m
+    state->posNED_z = FGJSBBase::FeetToMeters(nedPos(3)); // Z NED, m
     state->latitude_deg = propagate->GetLatitudeDeg();
     state->longitude_deg = propagate->GetLongitudeDeg();
     state->altitude_asl_ft = propagate->GetAltitudeASL();
