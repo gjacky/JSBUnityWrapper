@@ -21,6 +21,12 @@ struct JSBSimState {
     double vground_kts;       // groundspeed
     double vN_fps, vE_fps, vD_fps; // velocità nel frame locale NED (body->local)
 
+	// Assetto (quaternion)
+    double q_W;    // w (scalare)
+    double q_NORD; // x -> componente Nord
+    double q_EAST; // y -> componente Est
+    double q_DOWN; // z -> componente Down
+
     // Assetto (Eulero)
     double roll_rad;    // phi
     double pitch_rad;   // theta
@@ -52,4 +58,3 @@ JSBSIM_API void  JSBSim_SetPropertyDouble(void* fdm, const char* property, doubl
 JSBSIM_API double JSBSim_GetPropertyDouble(void* fdm, const char* property);
 JSBSIM_API double JSBSim_GetSimTime(void* fdm);
 JSBSIM_API void  JSBSim_GetState(void* fdm, JSBSimState* state);
-JSBSIM_API void JSBSim_SetControls(void* fdm , const JSBSimControls* controls);

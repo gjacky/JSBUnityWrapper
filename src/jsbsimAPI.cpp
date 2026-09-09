@@ -114,7 +114,14 @@ void JSBSim_GetState(void* fdm, JSBSimState* state) {
     state->vE_fps = propagate->GetVel(2);
     state->vD_fps = propagate->GetVel(3);
 
-    // Assetto
+    // nel tuo FDM exec / FGPropagate
+    FGQuaternion q = propagate->GetTl2b().GetQuaternion();
+    state->q_W = q(1); // w (scalare)
+    state->q_NORD = q(2); // x -> componente Nord
+    state->q_EAST = q(3); // y -> componente Est
+    state->q_DOWN = q(4); // z -> componente Down
+
+	// Assetti con angoli di Eulero (in radianti) in body frame ?
     state->roll_rad = propagate->GetEuler(1); // phi
     state->pitch_rad = propagate->GetEuler(2); // theta
     state->heading_rad = propagate->GetEuler(3); // psi
