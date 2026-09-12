@@ -9,12 +9,14 @@ using namespace JSBSim;
 
 struct JSBSimHandle {
     FGFDMExec* fdm;
+    JSBSim::FGColumnVector3 ecefOrigin;
     std::string lastError;
 };
 
 void* JSBSim_Create(const char* rootDir) {
     JSBSimHandle* handle = new JSBSimHandle();
     handle->fdm = new FGFDMExec();
+	handle->ecefOrigin = JSBSim::FGColumnVector3(20925646.3, 0.0, 0.0); // ECEF dell'origine (in piedi, unità JSBSim)
 
     if (rootDir) {
         SGPath root(rootDir);
