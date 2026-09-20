@@ -12,6 +12,21 @@ struct JSBSimHandle {
     std::string lastError;
 };
 
+static bool StateIsSane(JSBSim::FGFDMExec* fdm) {
+    auto pm = fdm->GetPropertyManager();
+    const char* props[] = {
+        "position/h-sl-ft",
+        "velocities/u-fps", "velocities/v-fps", "velocities/w-fps",
+        "attitude/phi-rad", "attitude/theta-rad", "attitude/psi-rad",
+        "accelerations/udot-ft_sec2"
+    };
+    for (const char* p : props) {
+        double v = pm->GetNode(p)->getDoubleValue();
+        if (std::isnan(v) || std::isinf(v)) return false;
+    }
+    return true;
+}
+
 void* JSBSim_Create(const char* rootDir) {
     JSBSimHandle* handle = new JSBSimHandle();
     handle->fdm = new FGFDMExec();
@@ -52,7 +67,6 @@ void JSBSim_GetLastError(void* fdm, char* buffer, int bufferSize) {
     buffer[bufferSize - 1] = '\0';
 }
 
-// TODO: aggiornare le funzioni RunIC, Run, SetProperty, GetProperty, GetSimTime per usare handle->fdm invece di fdm direttamente
 void JSBSim_RunIC(void* fdm) {
     JSBSimHandle* handle = static_cast<JSBSimHandle*>(fdm);
     handle->fdm->RunIC();
@@ -60,7 +74,24 @@ void JSBSim_RunIC(void* fdm) {
 
 int JSBSim_Run(void* fdm) {
     JSBSimHandle* handle = static_cast<JSBSimHandle*>(fdm);
-    return handle->fdm->Run() ? 1 : 0;
+    try {
+        if (!handle->fdm->Run()) {
+            handle->lastError = "Run del modello fallito";
+            return false;
+        }
+        if (!StateIsSane(handle->fdm)) {
+            handle->lastError = "Stato divergente (NaN/Inf) - probabile impatto";
+            handle->fdm->Hold();   // congela il modello
+            return false;
+        }
+    } catch (const std::exception& error) {
+        handle->lastError = std::string("Eccezione in Run(): ") + error.what();
+        return false;
+    } catch (...) {
+        handle->lastError = "Eccezione sconosciuta in Run()";
+        return false;
+    }
+    return true;
 }
 
 void JSBSim_SetPropertyDouble(void* fdm, const char* property, double value) {
